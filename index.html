@@ -1,0 +1,563 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cloudfields · Weekly Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --ink:#181816;--ink3:#8a8a84;--bg:#f5f3ee;--paper:#fff;--bd:#e0ddd6;
+  --teal:#157a5c;--tl:rgba(21,122,92,.13);--amb:#b8721f;--al:rgba(184,114,31,.13);
+  --red:#b83820;--rl:rgba(184,56,32,.11);--blue:#1e5fa8;--bl:rgba(30,95,168,.12);
+  --pur:#6d35a8;--pl:rgba(109,53,168,.11);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink);font-size:13px;}
+#app{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;overflow:hidden;}
+.hdr{flex:0 0 44px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  padding:0 16px;border-bottom:1.5px solid var(--ink);background:var(--bg);}
+.logo{font-size:15px;font-weight:700;letter-spacing:-.3px;}
+.hctr{text-align:center;font-size:10px;font-weight:600;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
+.hr{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
+.bdemo{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;background:var(--teal);color:#fff;}
+.bwow{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;}
+.wup{background:var(--tl);color:var(--teal);}.wdn{background:var(--rl);color:var(--red);}.wneu{background:var(--bd);color:var(--ink3);}
+.wbar{flex:0 0 38px;display:flex;align-items:center;gap:6px;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--bd);}
+.wlbl{font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-right:2px;}
+.wbtn{padding:4px 11px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--paper);color:var(--ink3);}
+.wbtn.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.wnote{margin-left:auto;font-size:10px;color:var(--ink3);}
+.tabs{flex:0 0 33px;display:flex;gap:1px;padding:6px 16px 0;background:var(--bg);}
+.tab{padding:6px 14px;font-size:11px;font-weight:600;color:var(--ink3);border-radius:6px 6px 0 0;cursor:pointer;border:1px solid transparent;}
+.tab.on{background:var(--paper);color:var(--ink);border-color:var(--bd);border-bottom-color:var(--paper);}
+.content{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px 16px 20px;background:var(--paper);border-top:1px solid var(--bd);}
+.pane{display:none;}.pane.on{display:block;}
+.ks{display:grid;gap:7px;margin-bottom:10px;}
+.k5{grid-template-columns:repeat(5,1fr);}.k3{grid-template-columns:repeat(3,1fr);}
+.kpi{background:var(--bg);border:1px solid var(--bd);border-radius:7px;padding:9px 11px;}
+.kl{font-size:8.5px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;}
+.kv{font-size:19px;font-weight:700;letter-spacing:-.6px;line-height:1;}
+.ks2{font-size:9px;color:var(--ink3);margin-top:2px;}
+.kw{font-size:9px;font-weight:600;margin-top:3px;}
+.up{color:var(--teal);}.dn{color:var(--red);}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;}
+.r32{display:grid;grid-template-columns:3fr 2fr;gap:9px;margin-bottom:9px;}
+.card{background:var(--bg);border:1px solid var(--bd);border-radius:7px;padding:10px 12px;}
+.ct{font-size:8.5px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.ct span{font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;}
+.pills{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
+.pill{padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--paper);color:var(--ink3);}
+.pill.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.pill.wk{border-color:var(--teal);color:var(--teal);}.pill.wk.on{background:var(--teal);color:#fff;}
+.sp2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:7px;}
+.sc{border-radius:6px;padding:7px 9px;}
+.sc.lu{background:var(--al);}.sc.di{background:var(--bl);}
+.scl{font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:2px;}
+.scl.lu{color:var(--amb);}.scl.di{color:var(--blue);}
+.scv{font-size:15px;font-weight:700;letter-spacing:-.4px;}
+.scs{font-size:9px;color:var(--ink3);margin-top:1px;}
+.rb{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.rbl{font-size:8.5px;font-weight:700;min-width:28px;}
+.rbr{flex:1;height:5px;border-radius:3px;background:var(--bd);}
+.rbf{height:100%;border-radius:3px;}
+.tag{display:inline-block;font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:3px;}
+.tg{background:var(--tl);color:var(--teal);}.ta{background:var(--al);color:var(--amb);}.tr{background:var(--rl);color:var(--red);}
+.ltog{display:flex;gap:3px;}
+.ltb{font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid var(--bd);background:var(--paper);color:var(--ink3);cursor:pointer;}
+.ltb.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.lcr{display:inline-flex;align-items:center;font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:3px;min-width:40px;justify-content:center;}
+.lcr.g{background:var(--tl);color:var(--teal);}.lcr.a{background:var(--al);color:var(--amb);}.lcr.r{background:var(--rl);color:var(--red);}
+.pr{display:flex;align-items:center;gap:5px;padding:5px 0;border-bottom:1px solid var(--bd);}
+.prk{font-size:8.5px;color:var(--ink3);min-width:13px;font-weight:700;}
+.pn{font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pbw{width:60px;}.pb{height:3px;background:var(--bd);border-radius:2px;}
+.pbf{height:100%;border-radius:2px;}
+.pv{font-size:10px;font-weight:700;min-width:46px;text-align:right;}
+.seg{display:flex;gap:5px;margin-bottom:8px;}
+.sb{padding:4px 12px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--paper);color:var(--ink3);}
+.sb.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.crow{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--bd);}
+.cfl{font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:3px;min-width:44px;text-align:center;}
+.cfr{background:var(--rl);color:var(--red);}.cfa{background:var(--al);color:var(--amb);}
+.proj{display:grid;grid-template-columns:1fr 1px 1fr 1px 2fr;gap:12px;align-items:center;
+  background:linear-gradient(120deg,var(--tl),var(--al));border:1px solid var(--bd);
+  border-radius:7px;padding:10px 14px;}
+.pdiv{height:32px;background:var(--bd);}
+.pl{font-size:8.5px;font-weight:700;color:var(--ink3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px;}
+.pv2{font-size:19px;font-weight:700;letter-spacing:-.5px;}
+.pn2{font-size:9.5px;color:var(--ink3);line-height:1.45;}
+.ch{position:relative;width:100%;}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="hdr">
+  <div><span class="logo">☁ Cloudfields</span></div>
+  <div class="hctr" id="hdrP">Weekly Operations Dashboard</div>
+  <div class="hr"><span class="bwow wneu" id="wowB">Select a week</span><span class="bdemo">DEMO</span></div>
+</div>
+<div class="wbar">
+  <span class="wlbl">Week</span>
+  <div class="wbtn" onclick="setWk(0,this)">1–7 Jun</div>
+  <div class="wbtn" onclick="setWk(1,this)">8–14 Jun</div>
+  <span class="wnote" id="wNote"></span>
+</div>
+<div class="tabs">
+  <div class="tab" onclick="goTab('sales')">Sales</div>
+  <div class="tab" onclick="goTab('labour')">Labour</div>
+  <div class="tab" onclick="goTab('products')">Products</div>
+  <div class="tab" onclick="goTab('pax')">Covers</div>
+  <div class="tab" onclick="goTab('cogs')">COGS</div>
+</div>
+<div class="content">
+
+<!-- SALES -->
+<div class="pane" id="pane-sales">
+  <div class="ks k5" id="s-kpis"></div>
+  <div class="r32">
+    <div class="card">
+      <div class="ct">Daily revenue <span>Tap day to drill in</span></div>
+      <div class="pills" id="s-pills"></div>
+      <div class="ch"><canvas id="c-rev" height="148"></canvas></div>
+    </div>
+    <div class="card" id="s-det"></div>
+  </div>
+  <div class="proj">
+    <div><div class="pl">Actual MTD (1–14 Jun)</div><div class="pv2" style="color:var(--teal)">$144.8K</div></div>
+    <div class="pdiv"></div>
+    <div><div class="pl">Projected full June</div><div class="pv2" style="color:var(--amb)">~$307K</div></div>
+    <div class="pdiv"></div>
+    <div class="pn2">14-day day-of-week averages applied to 15–30 Jun.<br>Mon $10.3K · Tue $6.8K · Wed $6.3K · Thu $7.4K<br>Fri $9.6K · Sat $16.7K · Sun $15.4K</div>
+  </div>
+</div>
+
+<!-- LABOUR -->
+<div class="pane" id="pane-labour">
+  <div class="ks k5" id="l-kpis"></div>
+  <div class="card" style="margin-bottom:9px">
+    <div class="ct">Daily labour cost vs revenue
+      <div class="ltog">
+        <div class="ltb on" onclick="setLV('c',this)">Combined</div>
+        <div class="ltb" onclick="setLV('s',this)">FOH / BOH</div>
+      </div>
+    </div>
+    <div class="ch"><canvas id="c-lab" height="148"></canvas></div>
+  </div>
+  <div class="r2">
+    <div class="card"><div class="ct">Labour cost ratio by day</div><div id="l-lcr"></div></div>
+    <div class="card"><div class="ct">FOH vs BOH split</div><div class="ch"><canvas id="c-fob" height="130"></canvas></div></div>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="pane" id="pane-products">
+  <div class="seg">
+    <div class="sb on" onclick="setPSeg('food',this)">🍽 Food</div>
+    <div class="sb" onclick="setPSeg('drinks',this)">☕ Drinks</div>
+  </div>
+  <div class="r2" style="margin-bottom:9px">
+    <div class="card"><div class="ct" id="p-rev-t">Top 10 food by revenue</div><div id="p-rev"></div></div>
+    <div class="card"><div class="ct" id="p-qty-t">Top 10 food by units sold</div><div id="p-qty"></div></div>
+  </div>
+  <div class="card"><div class="ct">Revenue by category</div><div class="ch"><canvas id="c-cat" height="100"></canvas></div></div>
+</div>
+
+<!-- PAX -->
+<div class="pane" id="pane-pax">
+  <div class="ks k3" id="x-kpis"></div>
+  <div class="card" style="margin-bottom:9px">
+    <div class="ct">Covers by day — lunch vs dinner <span>Lunch = before 5 pm</span></div>
+    <div class="ch"><canvas id="c-pax" height="143"></canvas></div>
+  </div>
+  <div class="r2">
+    <div class="card"><div class="ct">Avg spend / cover</div><div class="ch"><canvas id="c-spd" height="120"></canvas></div></div>
+    <div class="card"><div class="ct">Lunch vs dinner revenue</div><div class="ch"><canvas id="c-ld" height="120"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-top:9px">
+    <div class="ct">Week-on-week covers comparison <span>W1 = 1–7 Jun · W2 = 8–14 Jun</span></div>
+    <div id="pax-wow"></div>
+  </div>
+</div>
+
+<!-- COGS -->
+<div class="pane" id="pane-cogs">
+  <div class="ks k5" id="cogs-kpis"></div>
+  <div class="r2" style="margin-bottom:9px">
+    <div class="card">
+      <div class="ct">COGS by category <span>Jun MTD excl. staff meal</span></div>
+      <div class="ch"><canvas id="c-cogs-cat" height="145"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Weekly COGS vs revenue</div>
+      <div class="ch"><canvas id="c-cogs-wk" height="145"></canvas></div>
+    </div>
+  </div>
+  <div class="r2">
+    <div class="card">
+      <div class="ct">⚠ Price increases detected <span>same item, different unit price</span></div>
+      <div id="cogs-price"></div>
+    </div>
+    <div class="card">
+      <div class="ct">Top 10 items by spend</div>
+      <div id="cogs-items"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const W={
+  w1:{label:'1–7 Jun 2026',days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    rev:[14046,6733,6114,6324,9230,16742,16082],
+    pax:[560,214,216,216,330,676,607],ord:[185,72,70,70,92,192,161],
+    lR:[9694,4112,4064,3614,4082,11668,11290],dR:[4352,2621,2050,2710,5148,5074,4792],
+    lP:[408,144,136,138,142,454,459],dP:[152,70,80,78,188,222,148],
+    lab:[2433,1937,1842,1976,2044,2657,2445],foh:[1286,1077,1022,1101,1113,1487,1294],boh:[1147,860,820,875,931,1170,1151],
+    fRN:["Cacio E Pepe Fries","Nori Clams Pasta","Line-Caught Barramundi","Short Rib Rendang Mafaldine","Negitoro + Kimchi Tuna Meltz","Fruitti di Mare Bianco","Free-Range Roasted Chicken","Spinach Carbonara","Vintage Wagyu Burger","Kaarage Shiso Linguine"],
+    fRV:[7701.3,4594.2,4552.6,4432.65,4173.1,3796.1,3353.6,2860.0,2741.2,2466.1],
+    fQN:["Cacio E Pepe Fries","Nori Clams Pasta","Short Rib Rendang Mafaldine","Negitoro + Kimchi Tuna Meltz","Line-Caught Barramundi","Fruitti di Mare Bianco","Spinach Carbonara","Free-Range Roasted Chicken","Kaarage Shiso Linguine","Vintage Wagyu Burger"],
+    fQV:[434,178,154,150,134,131,111,105,99,98],
+    dRN:["Sky Meadows","White","Cloudfields Einspanner","Kumo","Black","Fresh Cold Pressed Juices","Morning Whisper","Rose Blush","Iced Lemon Tea","Warsteiner Pilsner"],
+    dRV:[1809.0,1746.5,1089.0,1040.0,691.0,658.0,640.0,560.0,552.0,540.0],
+    dQN:["White","Still","Sky Meadows","Kumo","Cloudfields Einspanner","Black","Fresh Cold Pressed Juices","Iced Lemon Tea","Morning Whisper","Rose Blush"],
+    dQV:[259,237,202,131,124,119,96,94,81,73],
+    cN:["Food","Signature Drinks","Coffee","Dessert","Juices","Water","White Wine","Wine","Craft Beer","Fresh Teas","Red Wine","Sparkling"],
+    cV:[60397.35,6191.3,3946.5,885.0,658.0,642.0,610.3,544.0,540.0,469.0,220.0,167.0]},
+  w2:{label:'8–14 Jun 2026',days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    rev:[6472,6832,6446,8443,9946,16564,14805],
+    pax:[211,236,247,282,310,642,537],ord:[64,72,80,85,86,195,163],
+    lR:[3903,3872,3704,4369,3945,11160,10223],dR:[2569,2960,2742,4074,6001,5404,4548],
+    lP:[146,150,140,161,124,431,385],dP:[65,86,107,121,186,211,152],
+    lab:[1822,1589,1943,2002,2103,2769,2514],foh:[1015,963,1090,1245,1264,1670,1521],boh:[807,626,853,756,839,1099,993],
+    fRN:["Cacio E Pepe Fries","Line-Caught Barramundi","Nori Clams Pasta","Negitoro + Kimchi Tuna Meltz","Short Rib Rendang Mafaldine","Free-Range Roasted Chicken","Fruitti di Mare Bianco","Vintage Wagyu Burger","Spinach Carbonara","Duck Duck Bao"],
+    fRV:[5995.8,4911.3,4248.4,3933.85,3851.2,3702.4,3414.75,3080.0,2954.9,2951.2],
+    fQN:["Cacio E Pepe Fries","Nori Clams Pasta","Line-Caught Barramundi","Negitoro + Kimchi Tuna Meltz","Short Rib Rendang Mafaldine","Fruitti di Mare Bianco","Free-Range Roasted Chicken","Spinach Carbonara","Vintage Wagyu Burger","Duck Duck Bao"],
+    fQV:[339,167,146,140,134,119,116,114,110,107],
+    dRN:["White","Sky Meadows","Cloudfields Einspanner","Kumo","Morning Whisper","Black","Rose Blush","Clementine","Lemonade","Still"],
+    dRV:[1564.23,1527.3,1042.2,966.4,718.0,591.4,488.0,448.0,441.0,425.8],
+    dQN:["White","Still","Sky Meadows","Kumo","Cloudfields Einspanner","Black","Morning Whisper","Iced Lemon Tea","Lemonade","Fresh Cold Pressed Juices"],
+    dQV:[239,213,171,122,116,109,95,66,63,61],
+    cN:["Food","Signature Drinks","Coffee","White Wine","Dessert","Wine","Red Wine","Water","Juices","Craft Beer","Fresh Teas","Sparkling","Alcohol"],
+    cV:[55633.75,5739.9,3412.78,822.0,790.5,721.0,652.0,599.8,411.95,330.0,266.0,95.0,1.0]}
+};
+
+const COGS={
+  total:41945.58,food:36858.78,bev:4250.70,mtdRev:144780.13,
+  foodPct:25.5,bevPct:2.9,totPct:29.0,
+  cats:[['Food Supplies',14989.55],['Food - Meat',7876.29],['Food - Seafood',4504.02],
+        ['Veg & Fruit',4362.77],['Bev Non-Alc',2531.20],['Bread & Pastries',1633.25],
+        ['Eggs',1541.20],['Condiment',1394.00],['Bev Alcohol',1289.50],
+        ['Kitchen Supply',659.60],['Pasta',557.70],['Bar Supplies',430.00],['Cleaning',176.50]],
+  wk:{w1:16169.70,w2:16847.96,w3:8927.92},
+  priceInc:[
+    {item:'Blueberry',cat:'Bar Supplies',sup:'Gastronut Foods',from:3.65,to:7.20,pct:97.3},
+    {item:'Wholesale Coffee Beans',cat:'Bev - Non Alcohol',sup:'Highlander Coffee',from:38.00,to:42.00,pct:10.5},
+  ],
+  topItems:[
+    ['Arla Pro Unsalted Butter','Food Supplies',1672.00],
+    ['Frozen 100% Wagyu Beef Burgers 56x180g','Food - Meat',1344.00],
+    ['Duck Leg Confit 11 Legs ~3.85kg','Food - Meat',1311.00],
+    ['Fries Colossal Crisp 3/8" 6x5lb','Food Supplies',1224.00],
+    ['IVP Chilled Seabass Fillet Skin On','Food - Seafood',1211.40],
+    ['Arla Pro Mixed Mozz/Cheddar Shredded','Food Supplies',1208.40],
+    ['Wholesale Coffee Beans','Bev Non-Alc',1200.00],
+    ['Frz NZ Beef Short Rib Bone-In','Food - Meat',1189.60],
+    ['NZ PS Beef Tenderloin Pure South','Food - Meat',1151.85],
+    ['Whipping Cream 35.5% 12x1L Westgold NZ','Food Supplies',1149.20],
+  ]
+};
+
+const C={t:'#157a5c',tl:'rgba(21,122,92,.13)',a:'#b8721f',al:'rgba(184,114,31,.13)',
+         r:'#b83820',rl:'rgba(184,56,32,.11)',b:'#1e5fa8',bl:'rgba(30,95,168,.12)',
+         p:'#6d35a8',pl:'rgba(109,53,168,.11)',k:'#18181a',g:'#8a8a84',br:'#e0ddd6'};
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const pct=(a,b)=>b>0?((a-b)/b*100).toFixed(1):null;
+let wk=null,day=0,lv='c',pseg='food';
+const ch={};const built={};
+function D(){return W[wk];}function O(){return W[wk==='w1'?'w2':'w1'];}
+function $g(id){return document.getElementById(id);}
+function mkBar(id,h){
+  // Wrap canvas in fixed-height div
+  const c=$g(id);const p=c.parentElement;
+  p.style.position='relative';p.style.height=h+'px';p.style.width='100%';
+}
+
+// ── WEEK SELECT ──────────────────────────────────────────────────────────────
+function setWk(i,btn){
+  const nw=i===0?'w1':'w2';if(nw===wk)return;wk=nw;
+  document.querySelectorAll('.wbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  $g('hdrP').textContent=D().label+' · Weekly Dashboard';
+  const p=wk==='w2'?pct(sum(W.w2.rev),sum(W.w1.rev)):null;
+  const b=$g('wowB');
+  if(p){b.textContent=(parseFloat(p)>=0?'▲':'▼')+Math.abs(p)+'% vs prior week';b.className='bwow '+(parseFloat(p)>=0?'wup':'wdn');}
+  else{b.textContent='Earliest week on file';b.className='bwow wneu';}
+  $g('wNote').textContent='Total: $'+Math.round(sum(D().rev)/1000)+'K';
+  Object.values(ch).forEach(c=>{try{c.destroy();}catch(e){}});
+  Object.keys(ch).forEach(k=>delete ch[k]);
+  Object.keys(built).forEach(k=>delete built[k]);
+  const at=document.querySelector('.tab.on');
+  if(at)goTab(at.getAttribute('onclick').match(/'(\w+)'/)[1]);
+}
+
+// ── TAB SELECT ───────────────────────────────────────────────────────────────
+function goTab(t){
+  if(!wk){setWk(0,document.querySelectorAll('.wbtn')[0]);}
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(e=>e.classList.remove('on'));
+  document.querySelector(`[onclick="goTab('${t}')"]`).classList.add('on');
+  $g('pane-'+t).classList.add('on');
+  if(!built[t]){built[t]=1;
+    if(t==='sales')bSales();else if(t==='labour')bLabour();
+    else if(t==='products')bProds();else if(t==='pax')bPax();
+    else if(t==='cogs')bCOGS();}
+}
+
+// ── SALES ────────────────────────────────────────────────────────────────────
+function bSales(){
+  const d=D(),wR=sum(d.rev),wP=sum(d.pax),wO=sum(d.ord);
+  const wow=wk==='w2'?pct(wR,sum(O().rev)):null;
+  const wH=wow?`<div class="kw ${parseFloat(wow)>=0?'up':'dn'}">${parseFloat(wow)>=0?'▲':'▼'}${Math.abs(wow)}% WoW</div>`:'';
+  $g('s-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Weekly revenue</div><div class="kv" style="color:var(--teal)">$${Math.round(wR/1000)}K</div>${wH}</div>
+    <div class="kpi"><div class="kl">Covers</div><div class="kv">${wP.toLocaleString()}</div><div class="ks2">Mon–Sun</div></div>
+    <div class="kpi"><div class="kl">Orders</div><div class="kv">${wO}</div><div class="ks2">completed</div></div>
+    <div class="kpi"><div class="kl">Avg / order</div><div class="kv">$${(wR/wO).toFixed(1)}</div><div class="ks2">excl. tax</div></div>
+    <div class="kpi"><div class="kl">Avg / cover</div><div class="kv">$${(wR/wP).toFixed(1)}</div><div class="ks2">excl. tax</div></div>`;
+  $g('s-pills').innerHTML=d.days.map((n,i)=>`<div class="pill${i>=5?' wk':''}${i===day?' on':''}" onclick="selD(${i},this)">${n}</div>`).join('');
+  if(ch.rev)ch.rev.destroy();
+  ch.rev=new Chart($g('c-rev'),{type:'bar',
+    data:{labels:d.days,datasets:[{data:d.rev,backgroundColor:d.rev.map((_,i)=>i>=5?C.t:C.tl),borderColor:C.t,borderWidth:1,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${c.parsed.y.toLocaleString()}`}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.g,font:{size:9}}},y:{grid:{color:C.br},ticks:{color:C.g,font:{size:9},callback:v=>'$'+Math.round(v/1000)+'K'}}},
+      onClick:(_,els)=>{if(els.length)selD(els[0].index,$g('s-pills').querySelectorAll('.pill')[els[0].index]);}}});
+  selD(day,$g('s-pills').querySelectorAll('.pill')[day]);
+}
+function selD(i,el){
+  day=i;$g('s-pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');
+  const d=D(),lcr=(d.lab[i]/d.rev[i]*100).toFixed(1);
+  const tc=parseFloat(lcr)<20?'tg':parseFloat(lcr)<30?'ta':'tr';
+  const avg=d.pax[i]>0?(d.rev[i]/d.pax[i]).toFixed(1):'-';
+  $g('s-det').innerHTML=`
+    <div style="font-size:8.5px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">${d.days[i]}</div>
+    <div style="font-size:22px;font-weight:700;letter-spacing:-1px;margin-bottom:2px">$${d.rev[i].toLocaleString()}</div>
+    <div style="font-size:10px;color:var(--ink3);margin-bottom:8px">${d.ord[i]} orders · ${d.pax[i]} covers · $${avg}/cover &nbsp;<span class="tag ${tc}">Labour ${lcr}%</span></div>
+    <div class="sp2">
+      <div class="sc lu"><div class="scl lu">Lunch</div><div class="scv">$${d.lR[i].toLocaleString()}</div><div class="scs">${d.lP[i]} covers · $${d.lP[i]>0?(d.lR[i]/d.lP[i]).toFixed(1):'-'}/pax</div></div>
+      <div class="sc di"><div class="scl di">Dinner</div><div class="scv">$${d.dR[i].toLocaleString()}</div><div class="scs">${d.dP[i]} covers · $${d.dP[i]>0?(d.dR[i]/d.dP[i]).toFixed(1):'-'}/pax</div></div>
+    </div>
+    <div style="font-size:8.5px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px">Labour</div>
+    <div class="rb"><span class="rbl" style="color:var(--blue)">FOH</span><div class="rbr"><div class="rbf" style="width:${Math.min((d.foh[i]/d.rev[i]*100),100).toFixed(0)}%;background:var(--blue)"></div></div><span style="font-size:10px;font-weight:600;min-width:38px;text-align:right">$${d.foh[i].toLocaleString()}</span></div>
+    <div class="rb"><span class="rbl" style="color:var(--pur)">BOH</span><div class="rbr"><div class="rbf" style="width:${Math.min((d.boh[i]/d.rev[i]*100),100).toFixed(0)}%;background:var(--pur)"></div></div><span style="font-size:10px;font-weight:600;min-width:38px;text-align:right">$${d.boh[i].toLocaleString()}</span></div>`;
+}
+
+// ── LABOUR ───────────────────────────────────────────────────────────────────
+function bLabour(){
+  const d=D(),wL=sum(d.lab),wR=sum(d.rev),wF=sum(d.foh),wB=sum(d.boh);
+  const wowL=wk==='w2'?pct(wL,sum(O().lab)):null;
+  const wH=wowL?`<div class="kw ${parseFloat(wowL)>=0?'dn':'up'}">${parseFloat(wowL)>=0?'▲':'▼'}${Math.abs(wowL)}% WoW</div>`:'';
+  $g('l-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Weekly labour</div><div class="kv" style="color:var(--blue)">$${Math.round(wL/1000)}K</div>${wH}</div>
+    <div class="kpi"><div class="kl">Labour ratio</div><div class="kv">${(wL/wR*100).toFixed(1)}%</div><div class="ks2">of revenue</div></div>
+    <div class="kpi"><div class="kl">FOH</div><div class="kv" style="color:var(--blue)">$${Math.round(wF/1000)}K</div><div class="ks2">${(wF/wL*100).toFixed(0)}% of labour</div></div>
+    <div class="kpi"><div class="kl">BOH</div><div class="kv" style="color:var(--pur)">$${Math.round(wB/1000)}K</div><div class="ks2">${(wB/wL*100).toFixed(0)}% of labour</div></div>
+    <div class="kpi"><div class="kl">Rev / labour</div><div class="kv">${(wR/wL).toFixed(1)}×</div><div class="ks2">coverage ratio</div></div>`;
+  bLC(lv);bLCR();bFOB();
+}
+function bLC(m){
+  lv=m;if(ch.lab)ch.lab.destroy();const d=D();
+  const lcr=d.rev.map((r,i)=>parseFloat((d.lab[i]/r*100).toFixed(1)));
+  const ds=m==='c'?[
+    {type:'bar',label:'Labour $',data:d.lab,backgroundColor:C.bl,borderColor:C.b,borderWidth:1,borderRadius:4,yAxisID:'y'},
+    {type:'line',label:'Revenue $',data:d.rev,borderColor:C.t,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:C.t,tension:.3,yAxisID:'y'},
+    {type:'line',label:'Labour %',data:lcr,borderColor:C.a,borderDash:[4,3],backgroundColor:'transparent',borderWidth:1.5,pointRadius:3,pointBackgroundColor:C.a,tension:.3,yAxisID:'y2'},
+  ]:[
+    {type:'bar',label:'FOH',data:d.foh,backgroundColor:C.bl,borderColor:C.b,borderWidth:1,borderRadius:4,stack:'s'},
+    {type:'bar',label:'BOH',data:d.boh,backgroundColor:C.pl,borderColor:C.p,borderWidth:1,borderRadius:4,stack:'s'},
+    {type:'line',label:'Revenue',data:d.rev,borderColor:C.t,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:C.t,tension:.3,yAxisID:'y2'},
+  ];
+  ch.lab=new Chart($g('c-lab'),{data:{labels:d.days,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{font:{size:9},color:'#46464a',boxWidth:9,padding:10}},tooltip:{mode:'index',intersect:false}},
+      scales:{x:{grid:{display:false},ticks:{color:C.g,font:{size:9}}},
+        y:{grid:{color:C.br},ticks:{color:C.g,font:{size:9},callback:v=>'$'+v.toLocaleString()}},
+        y2:{position:'right',grid:{display:false},ticks:{color:m==='c'?C.a:C.t,font:{size:9},callback:v=>m==='c'?v+'%':'$'+Math.round(v/1000)+'K'}}}}});
+}
+function setLV(m,btn){document.querySelectorAll('.ltb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');bLC(m);}
+function bLCR(){
+  const d=D(),mx=Math.max(...d.rev);
+  $g('l-lcr').innerHTML=d.days.map((n,i)=>{
+    const lcr=(d.lab[i]/d.rev[i]*100).toFixed(1),cls=parseFloat(lcr)<20?'g':parseFloat(lcr)<30?'a':'r';
+    return `<div style="display:flex;align-items:center;gap:5px;padding:5px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-size:11px;font-weight:600;min-width:26px">${n}</span>
+      <div style="flex:1;height:4px;background:var(--bd);border-radius:2px;overflow:hidden"><div style="height:100%;width:${(d.rev[i]/mx*100).toFixed(0)}%;background:var(--teal);border-radius:2px"></div></div>
+      <span style="font-size:9.5px;color:var(--ink3);min-width:50px;text-align:right">$${d.rev[i].toLocaleString()}</span>
+      <span class="lcr ${cls}">${lcr}%</span></div>`;}).join('');
+}
+function bFOB(){
+  if(ch.fob)ch.fob.destroy();const d=D(),wF=sum(d.foh),wB=sum(d.boh);
+  ch.fob=new Chart($g('c-fob'),{type:'doughnut',
+    data:{labels:['FOH','BOH'],datasets:[{data:[wF,wB],backgroundColor:[C.bl,C.pl],borderColor:[C.b,C.p],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},color:'#46464a',boxWidth:9,padding:8}},
+        tooltip:{callbacks:{label:c=>`${c.label}: $${c.parsed.toLocaleString()} (${(c.parsed/(wF+wB)*100).toFixed(0)}%)`}}}}});
+}
+
+// ── PRODUCTS ─────────────────────────────────────────────────────────────────
+function setPSeg(seg,btn){
+  pseg=seg;document.querySelectorAll('.sb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  renderProds();
+}
+function bProds(){renderProds();}
+function renderProds(){
+  const d=D(),isF=pseg==='food';
+  const rN=isF?d.fRN:d.dRN,rV=isF?d.fRV:d.dRV,qN=isF?d.fQN:d.dQN,qV=isF?d.fQV:d.dQV;
+  $g('p-rev-t').textContent='Top '+(isF?'food':'drinks')+' by revenue';
+  $g('p-qty-t').textContent='Top '+(isF?'food':'drinks')+' by units sold';
+  const mx=rV[0]||1,mq=qV[0]||1;
+  $g('p-rev').innerHTML=rN.map((n,i)=>`<div class="pr"><span class="prk">${i+1}</span><span class="pn" title="${n}">${n}</span><div class="pbw"><div class="pb"><div class="pbf" style="width:${(rV[i]/mx*100).toFixed(0)}%;background:var(--teal)"></div></div></div><span class="pv">$${rV[i].toLocaleString()}</span></div>`).join('');
+  $g('p-qty').innerHTML=qN.map((n,i)=>`<div class="pr"><span class="prk">${i+1}</span><span class="pn" title="${n}">${n}</span><div class="pbw"><div class="pb"><div class="pbf" style="width:${(qV[i]/mq*100).toFixed(0)}%;background:var(--amb)"></div></div></div><span class="pv" style="color:var(--amb)">${qV[i]}</span></div>`).join('');
+  if(ch.cat)ch.cat.destroy();
+  const clrs=[C.t,C.b,C.a,C.al,C.pl,C.tl,C.bl,'#aaa','#ccc','#eee','#ddd','#bbb','#999'];
+  ch.cat=new Chart($g('c-cat'),{type:'bar',
+    data:{labels:d.cN,datasets:[{data:d.cV,backgroundColor:d.cN.map((_,i)=>clrs[i]||'#ccc'),borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${c.parsed.x.toLocaleString()}`}}},
+      scales:{x:{grid:{color:C.br},ticks:{color:C.g,font:{size:9},callback:v=>'$'+Math.round(v/1000)+'K'}},
+              y:{grid:{display:false},ticks:{color:C.k,font:{size:9}}}}}});
+}
+
+// ── PAX ──────────────────────────────────────────────────────────────────────
+function bPax(){
+  const d=D(),wP=sum(d.pax),wR=sum(d.rev),peak=d.days[d.pax.indexOf(Math.max(...d.pax))];
+  $g('x-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Total covers</div><div class="kv">${wP.toLocaleString()}</div></div>
+    <div class="kpi"><div class="kl">Avg spend / cover</div><div class="kv">$${(wR/wP).toFixed(1)}</div><div class="ks2">excl. tax</div></div>
+    <div class="kpi"><div class="kl">Peak day</div><div class="kv">${peak}</div><div class="ks2">${Math.max(...d.pax)} covers</div></div>`;
+  if(ch.pax)ch.pax.destroy();
+  ch.pax=new Chart($g('c-pax'),{type:'bar',
+    data:{labels:d.days,datasets:[{label:'Lunch',data:d.lP,backgroundColor:C.al,borderColor:C.a,borderWidth:1,borderRadius:4,stack:'s'},{label:'Dinner',data:d.dP,backgroundColor:C.bl,borderColor:C.b,borderWidth:1,borderRadius:4,stack:'s'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{font:{size:9},color:'#46464a',boxWidth:9,padding:10}},tooltip:{mode:'index',intersect:false},
+        datalabels:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{color:C.g,font:{size:9}}},y:{grid:{color:C.br},ticks:{color:C.g,font:{size:9}}}},
+      animation:{onComplete:function(){const ctx=this.ctx;ctx.font='bold 9px sans-serif';ctx.fillStyle=C.k;ctx.textAlign='center';ctx.textBaseline='bottom';
+        const meta0=this.getDatasetMeta(0),meta1=this.getDatasetMeta(1);
+        meta0.data.forEach((bar,i)=>{const v0=this.data.datasets[0].data[i],v1=this.data.datasets[1].data[i];
+          ctx.fillText(v0+v1,bar.x,bar.y-3);});}}
+    }});
+  if(ch.spd)ch.spd.destroy();
+  ch.spd=new Chart($g('c-spd'),{type:'line',
+    data:{labels:d.days,datasets:[{data:d.pax.map((p,i)=>p>0?parseFloat((d.rev[i]/p).toFixed(1)):0),borderColor:C.t,backgroundColor:C.tl,fill:true,tension:.35,pointRadius:4,pointBackgroundColor:C.t,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${c.parsed.y.toFixed(1)}/cover`}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.g,font:{size:9}}},y:{min:25,max:40,grid:{color:C.br},ticks:{color:C.g,font:{size:9},callback:v=>'$'+v}}}}});
+  // WoW covers comparison table
+  const w1pax=[560,214,216,216,330,676,607];
+  const w2pax=[211,236,247,282,310,642,537];
+  const w1lp=[408,144,136,138,142,454,459],w1dp=[152,70,80,78,188,222,148];
+  const w2lp=[146,150,140,161,124,431,385],w2dp=[65,86,107,121,186,211,152];
+  const curPax=wk==='w1'?w1pax:w2pax;
+  const othPax=wk==='w1'?w2pax:w1pax;
+  const curLP=wk==='w1'?w1lp:w2lp,curDP=wk==='w1'?w1dp:w2dp;
+  const othLP=wk==='w1'?w2lp:w1lp,othDP=wk==='w1'?w2dp:w1dp;
+  const paxWow=curPax.map((v,i)=>othPax[i]>0?((v-othPax[i])/othPax[i]*100).toFixed(1):null);
+  const wowLabel=wk==='w1'?'vs 8–14 Jun':'vs 1–7 Jun';
+  const totCur=sum(curPax),totOth=sum(othPax);
+  const totWow=((totCur-totOth)/totOth*100).toFixed(1);
+  $g('pax-wow').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px">
+      <div class="kpi"><div class="kl">This week covers</div><div class="kv">${totCur.toLocaleString()}</div></div>
+      <div class="kpi"><div class="kl">Prior week covers</div><div class="kv">${totOth.toLocaleString()}</div></div>
+      <div class="kpi"><div class="kl">WoW change</div><div class="kv ${parseFloat(totWow)>=0?'up':'dn'}">${parseFloat(totWow)>=0?'▲':'▼'}${Math.abs(totWow)}%</div></div>
+      <div class="kpi"><div class="kl">Note</div><div class="ks2" style="margin-top:4px;font-size:9.5px">W1 Mon was likely a PH (Vesak Day) which inflated covers</div></div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr style="font-size:9px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">
+        <td style="padding:4px 0;border-bottom:1px solid var(--bd)">Day</td>
+        <td style="padding:4px 6px;border-bottom:1px solid var(--bd);text-align:right">This wk</td>
+        <td style="padding:4px 6px;border-bottom:1px solid var(--bd);text-align:right">Lunch</td>
+        <td style="padding:4px 6px;border-bottom:1px solid var(--bd);text-align:right">Dinner</td>
+        <td style="padding:4px 6px;border-bottom:1px solid var(--bd);text-align:right">Prior wk</td>
+        <td style="padding:4px 0;border-bottom:1px solid var(--bd);text-align:right">WoW ${wowLabel}</td>
+      </tr></thead>
+      <tbody>${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day,i)=>{
+        const w=paxWow[i];const cls=w===null?'':parseFloat(w)>=0?'color:var(--teal)':'color:var(--red)';
+        const arr=w===null?'–':(parseFloat(w)>=0?'▲ +':'▼ ')+Math.abs(w)+'%';
+        return `<tr style="border-bottom:1px solid var(--bd)">
+          <td style="padding:5px 0;font-weight:600">${day}</td>
+          <td style="padding:5px 6px;text-align:right">${curPax[i]}</td>
+          <td style="padding:5px 6px;text-align:right;color:var(--amb)">${curLP[i]}</td>
+          <td style="padding:5px 6px;text-align:right;color:var(--blue)">${curDP[i]}</td>
+          <td style="padding:5px 6px;text-align:right;color:var(--ink3)">${othPax[i]}</td>
+          <td style="padding:5px 0;text-align:right;font-weight:600;${cls}">${arr}</td>
+        </tr>`;}).join('')}</tbody>
+    </table>`;
+
+  if(ch.ld)ch.ld.destroy();
+  const tL=sum(d.lR),tD=sum(d.dR);
+  ch.ld=new Chart($g('c-ld'),{type:'doughnut',
+    data:{labels:['Lunch','Dinner'],datasets:[{data:[tL,tD],backgroundColor:[C.al,C.bl],borderColor:[C.a,C.b],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},color:'#46464a',boxWidth:9,padding:8}},
+        tooltip:{callbacks:{label:c=>`${c.label}: $${c.parsed.toLocaleString()} (${(c.parsed/(tL+tD)*100).toFixed(0)}%)`}}}}});
+}
+
+// ── COGS ─────────────────────────────────────────────────────────────────────
+function bCOGS(){
+  $g('cogs-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Total COGS (MTD)</div><div class="kv">$${(COGS.total/1000).toFixed(1)}K</div><div class="ks2">1–14 Jun excl. staff meal</div></div>
+    <div class="kpi"><div class="kl">Food cost %</div><div class="kv ${COGS.foodPct>32?'dn':COGS.foodPct<28?'up':''}">${COGS.foodPct}%</div><div class="ks2">of MTD revenue</div></div>
+    <div class="kpi"><div class="kl">Bev cost %</div><div class="kv">${COGS.bevPct}%</div><div class="ks2">of MTD revenue</div></div>
+    <div class="kpi"><div class="kl">Total cost %</div><div class="kv ${COGS.totPct>35?'dn':COGS.totPct<30?'up':''}">${COGS.totPct}%</div><div class="ks2">of MTD revenue</div></div>
+    <div class="kpi"><div class="kl">Price alerts</div><div class="kv" style="color:var(--red)">${COGS.priceInc.length}</div><div class="ks2">items with price increases</div></div>`;
+  // Category chart
+  if(ch.cogsCat)ch.cogsCat.destroy();
+  const clrs=[C.t,C.b,C.a,C.tl,C.pl,C.al,C.bl,C.t,C.b,C.a,C.tl,C.pl,'#bbb'];
+  ch.cogsCat=new Chart($g('c-cogs-cat'),{type:'bar',
+    data:{labels:COGS.cats.map(r=>r[0]),datasets:[{data:COGS.cats.map(r=>r[1]),backgroundColor:clrs,borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${c.parsed.x.toLocaleString()}`}}},
+      scales:{x:{grid:{color:C.br},ticks:{color:C.g,font:{size:9},callback:v=>'$'+Math.round(v/1000)+'K'}},
+              y:{grid:{display:false},ticks:{color:C.k,font:{size:9}}}}}});
+  // Weekly trend
+  if(ch.cogsWk)ch.cogsWk.destroy();
+  const w1r=75270.45,w2r=69509.68;
+  ch.cogsWk=new Chart($g('c-cogs-wk'),{
+    data:{labels:['1–7 Jun','8–14 Jun','15+ Jun (partial)'],
+      datasets:[
+        {type:'bar',label:'COGS $',data:[COGS.wk.w1,COGS.wk.w2,COGS.wk.w3],backgroundColor:[C.tl,C.tl,C.al],borderColor:[C.t,C.t,C.a],borderWidth:1,borderRadius:4,yAxisID:'y'},
+        {type:'line',label:'Revenue',data:[w1r,w2r,null],borderColor:C.t,backgroundColor:'transparent',borderWidth:2,pointRadius:4,pointBackgroundColor:C.t,tension:.3,yAxisID:'y'},
+        {type:'line',label:'Cost %',data:[+(COGS.wk.w1/w1r*100).toFixed(1),+(COGS.wk.w2/w2r*100).toFixed(1),null],borderColor:C.a,borderDash:[4,3],backgroundColor:'transparent',borderWidth:1.5,pointRadius:4,pointBackgroundColor:C.a,tension:.3,yAxisID:'y2'},
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{font:{size:9},color:'#46464a',boxWidth:9,padding:8}},tooltip:{mode:'index',intersect:false}},
+      scales:{x:{grid:{display:false},ticks:{color:C.g,font:{size:9}}},
+        y:{suggestedMin:10000,grid:{color:C.br},ticks:{color:C.g,font:{size:9},callback:v=>'$'+Math.round(v/1000)+'K'}},
+        y2:{position:'right',min:15,max:30,grid:{display:false},ticks:{color:C.a,font:{size:9},callback:v=>v+'%'}}}}});
+  // Price increases
+  $g('cogs-price').innerHTML=COGS.priceInc.map(p=>{
+    const cls=p.pct>50?'cfr':'cfa';
+    return `<div class="crow">
+      <span class="cfl ${cls}">+${p.pct}%</span>
+      <div style="flex:1;overflow:hidden"><div style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${p.item}">${p.item}</div><div style="font-size:9px;color:var(--ink3)">${p.sup}</div></div>
+      <span style="font-size:9px;color:var(--ink3);min-width:90px;text-align:right">$${p.from}→$${p.to}</span>
+    </div>`;}).join('')+
+    `<div style="font-size:9px;color:var(--ink3);margin-top:8px;padding-top:6px;border-top:1px solid var(--bd);line-height:1.4">Note: Only 2 price increases found in Jun data — more may appear as additional invoices are processed.</div>`;
+  // Top items
+  const mxi=COGS.topItems[0][2];
+  $g('cogs-items').innerHTML=COGS.topItems.map(([item,cat,val],i)=>`
+    <div class="crow">
+      <span style="font-size:8.5px;color:var(--ink3);min-width:14px;font-weight:700">${i+1}</span>
+      <div style="flex:1;overflow:hidden"><div style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${item}">${item}</div><div style="font-size:9px;color:var(--ink3)">${cat}</div></div>
+      <div style="width:50px;margin:0 6px"><div style="height:3px;background:var(--bd);border-radius:2px"><div style="height:100%;width:${(val/mxi*100).toFixed(0)}%;background:var(--teal);border-radius:2px"></div></div></div>
+      <span style="font-size:10px;font-weight:700;min-width:48px;text-align:right">$${val.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+goTab('sales');
+</script>
+</body></html>
